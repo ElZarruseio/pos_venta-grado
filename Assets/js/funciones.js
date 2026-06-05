@@ -47,6 +47,10 @@ function frmlogin(e) {
   }
 }
 function frmUsuario() {
+  document.getElementById("title").innerHTML = "Nuevo usuario";
+  document.getElementById("btnAccion").innerHTML = "Registrar ";
+  document.getElementById("claves").classList.remove("d-none");
+  document.getElementById("frmUsuario").reset();
   $("#nuevo_usuario").modal("show");
 }
 
@@ -79,21 +83,54 @@ function registrarUser(e) {
       timer: 3000,
     });
   } else {
-    const url = base_url + "Usuarios/validar";
-    const frm = document.getElementById("frmlogin");
+    const url = base_url + "Usuarios/registrar";
+    const frm = document.getElementById("frmUsuario");
     const http = new XMLHttpRequest();
     http.open("POST", url, true);
     http.send(new FormData(frm));
     http.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
         const res = JSON.parse(this.responseText);
-        if (res == "ok") {
-          window.location = base_url + "Usuarios";
+        if (res == "Si") {
+          Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: "Usuario registrado con éxito",
+            showConfirmButton: false,
+            timer: 3000,
+          })
+          frm.reset();
+          $("#nuevo_usuario").modal("hide");
         } else {
-          document.getElementById("alerta").classList.remove("d-none");
-          document.getElementById("alerta").innerHTML = res;
+          Swal.fire({
+            position: "top-end",
+            icon: "error",
+            title: res,
+            showConfirmButton: false,
+            timer: 3000,
+          })
         }
       }
     };
   }
+}
+
+function btnEditarUser(id) {
+  document.getElementById("title").innerHTML = "Actualizar usuario";
+  document.getElementById("btnAccion").innerHTML = "Actualizar";
+  const url = base_url + "Usuarios/editar/" + id;
+    const http = new XMLHttpRequest();
+    http.open("GET", url, true);
+    http.send();
+    http.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        const res = JSON.parse(this.responseText);
+        document.getElementById("id").value = res.id;
+        document.getElementById("usuario").value = res.usuario;
+        document.getElementById("nombre").value = res.nombre;
+        document.getElementById("caja").value = res.id_caja;
+        document.getElementById("claves").classList.add("d-none");
+        $("#nuevo_usuario").modal("show");
+      }
+    };
 }
