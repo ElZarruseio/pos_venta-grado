@@ -1,6 +1,6 @@
 <?php
 class UsuariosModel extends Query{
-    private $usuario, $nombre, $clave, $id_caja;
+    private $usuario, $nombre, $clave, $id_caja, $id;
     public function __construct() {
         parent::__construct();
     }
@@ -44,6 +44,24 @@ class UsuariosModel extends Query{
         }
           return $res;
     }
+
+     public function modificarUsuario(string $usuario, string $nombre, int $id_caja, int $id) {
+        $this->usuario = $usuario;
+        $this->nombre = $nombre;
+        $this->id = $id;
+        $this->id_caja = $id_caja;
+      
+            $sql = "UPDATE usuarios SET usuario = ?, nombre = ?, id_caja = ? WHERE id = ?";
+            $datos = array($this->usuario, $this->nombre, $this->id_caja, $this->id);
+            $data = $this->save($sql, $datos);
+            if($data == 1){
+                $res = "modificado";
+            }else {
+                $res = "Error al modificar el usuario";
+            }
+          return $res;
+    }
+    
 
     public function editarUser(int $id) {
         $sql = "SELECT * FROM usuarios WHERE id = $id";

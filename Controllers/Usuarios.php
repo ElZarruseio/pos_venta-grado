@@ -49,45 +49,52 @@ class Usuarios extends Controller{
 
     }
 
-    public function Registrar(){
-         header('Content-Type: application/json');
-        $usuario = $_POST ['usuario'];
-        $nombre = $_POST ['nombre'];
-        $clave = $_POST ['clave'];
-        $confirmar = $_POST ['confirmar'];
-        $caja = $_POST ['caja'];
-        if(empty($usuario) || empty($nombre) || empty($caja)){
-            $msg = "Todos los campos son obligatorios";
-        }else {
-            if ($_POST['id'] == "") {
-                if ($clave != $confirmar) {
-                    $msg = "Las contraseñas no coinciden";
-                    echo json_encode($msg, JSON_UNESCAPED_UNICODE);
-                    die();
-                }
-                $data = $this->model->registrarUsuario($usuario, $nombre, $clave, $caja);
-                if($data == "ok"){
-                    $msg = "Si";
-                } else if ($data == "El usuario ya existe") {
-                    $msg = "El usuario ya existe";
+  public function Registrar(){
+    header('Content-Type: application/json');
+    $usuario = $_POST['usuario'];
+    $nombre = $_POST['nombre'];
+    $clave = $_POST['clave'];
+    $confirmar = $_POST['confirmar'];
+    $caja = $_POST['caja'];
+    $id = $_POST['id'];
+    $hash = hash("SHA256", $clave);
+    
+    if (empty($usuario) || empty($nombre) || empty($caja)) {
+        $res = "Todos los campos son obligatorios";
+    } else {
+        if ($id == "") {
+            if (empty($clave)) {
+                $res = "La contraseña es obligatoria para usuarios nuevos";
+            } else {
+                $msg = $this->model->registrarUsuario($usuario, $nombre, $hash, $caja);
+                if ($msg == "ok") {
+                    // CAMBIO AQUÍ: Enviamos "si" en minúscula para que coincida con la validación JS
+                    $res = "si"; 
                 } else {
-                    $msg = "Error al registrar el usuario";
-                } 
-               
-
-            }else {
-                    # code...
+                    $res = $msg;
                 }
+            }
+        } else {
+            // MODIFICACIÓN DE REGISTRO
+            $msg = $this->model->modificarUsuario($usuario, $nombre, $caja, $id);
+            if ($msg == "modificado") {
+                $res = "modificado";
+            } else {
+                $res = $msg;
+            }
         }
-        echo json_encode($msg, JSON_UNESCAPED_UNICODE);
-        die();
     }
+    echo json_encode($res, JSON_UNESCAPED_UNICODE);
+    die();
+}
 
+    
     public function editar (int $id){
        $data = $this->model->editarUser($id);
        echo json_encode($data, JSON_UNESCAPED_UNICODE);
        die();
-       }
+   }
+    
 }
                                 
 

@@ -48,33 +48,31 @@ function frmlogin(e) {
 }
 function frmUsuario() {
   document.getElementById("title").innerHTML = "Nuevo usuario";
-  document.getElementById("btnAccion").innerHTML = "Registrar ";
+  document.getElementById("btnAccion").innerHTML = "Registrar";
   document.getElementById("claves").classList.remove("d-none");
+  document.getElementById("id").value = ""; // Limpiamos el ID oculto
   document.getElementById("frmUsuario").reset();
   $("#nuevo_usuario").modal("show");
 }
 
 function registrarUser(e) {
   e.preventDefault();
+  const id = document.getElementById("id").value;
   const usuario = document.getElementById("usuario");
   const nombre = document.getElementById("nombre");
   const clave = document.getElementById("clave");
   const confirmar = document.getElementById("confirmar");
   const caja = document.getElementById("caja");
-  if (
-    usuario.value == "" ||
-    nombre.value == "" ||
-    clave.value == "" ||
-    caja.value == ""
-  ) {
+
+  if (usuario.value == "" || nombre.value == "" || caja.value == "" || (id == "" && clave.value == "")) {
     Swal.fire({
       position: "top-end",
       icon: "error",
-      title: "Todos los campos son obligatorios",
+      title: "Todos los campos obligatorios deben estar llenos",
       showConfirmButton: false,
       timer: 3000,
     });
-  } else if (clave.value != confirmar.value) {
+  } else if (id == "" && clave.value != confirmar.value) { 
     Swal.fire({
       position: "top-end",
       icon: "error",
@@ -90,25 +88,42 @@ function registrarUser(e) {
     http.send(new FormData(frm));
     http.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
-        const res = JSON.parse(this.responseText);
-        if (res == "Si") {
-          Swal.fire({
-            position: "top-end",
-            icon: "success",
-            title: "Usuario registrado con éxito",
-            showConfirmButton: false,
-            timer: 3000,
-          })
-          frm.reset();
-          $("#nuevo_usuario").modal("hide");
-        } else {
-          Swal.fire({
-            position: "top-end",
-            icon: "error",
-            title: res,
-            showConfirmButton: false,
-            timer: 3000,
-          })
+        try {
+          const res = JSON.parse(this.responseText);
+          
+          // Convertimos a minúsculas para validar de forma segura ("si" o "modificado")
+          if (res.toLowerCase() == "si") {
+            Swal.fire({
+              position: "top-end",
+              icon: "success",
+              title: "Usuario registrado con éxito",
+              showConfirmButton: false,
+              timer: 3000,
+            });
+            frm.reset();
+            $("#nuevo_usuario").modal("hide");
+            tblUsuarios.ajax.reload(); // <--- Ahora se ejecutará correctamente sin colgarse
+          } else if (res.toLowerCase() == "modificado") {
+            Swal.fire({
+              position: "top-end",
+              icon: "success",
+              title: "Usuario modificado con éxito",
+              showConfirmButton: false,
+              timer: 3000,
+            });
+            $("#nuevo_usuario").modal("hide"); 
+            tblUsuarios.ajax.reload(); 
+          } else {
+            Swal.fire({
+              position: "top-end",
+              icon: "error",
+              title: res,
+              showConfirmButton: false,
+              timer: 3000,
+            });
+          }
+        } catch (error) {
+          console.error("Error al parsear JSON:", this.responseText);
         }
       }
     };
@@ -119,18 +134,26 @@ function btnEditarUser(id) {
   document.getElementById("title").innerHTML = "Actualizar usuario";
   document.getElementById("btnAccion").innerHTML = "Actualizar";
   const url = base_url + "Usuarios/editar/" + id;
-    const http = new XMLHttpRequest();
-    http.open("GET", url, true);
-    http.send();
-    http.onreadystatechange = function () {
-      if (this.readyState == 4 && this.status == 200) {
+  const http = new XMLHttpRequest();
+  http.open("GET", url, true);
+  http.send();
+  http.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      try {
         const res = JSON.parse(this.responseText);
+        
+        // Asignación de datos al formulario modal
         document.getElementById("id").value = res.id;
         document.getElementById("usuario").value = res.usuario;
         document.getElementById("nombre").value = res.nombre;
         document.getElementById("caja").value = res.id_caja;
+        
+        // Ocultamos las claves porque no se van a editar aquí
         document.getElementById("claves").classList.add("d-none");
         $("#nuevo_usuario").modal("show");
+      } catch (error) {
+        console.error("Error al procesar la respuesta del servidor. Asegúrate de que el controlador devuelva un JSON válido.", error);
       }
-    };
+    }
+  };
 }

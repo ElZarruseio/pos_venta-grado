@@ -3,6 +3,7 @@
     <li class="breadcrumb-item active">Usuarios</li>
 </ol>
 <button class="btn btn-primary mb-2" type="button" onclick="frmUsuario();">Nuevo</button>
+
 <table class="table table-light" id="tblusuarios">
     <thead class="thead-dark">
         <tr>
@@ -15,11 +16,9 @@
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <td></td>
-        </tr>
-    </tbody>
+        </tbody>
 </table>
+
 <div id="nuevo_usuario" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="my-modal-title" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -30,16 +29,20 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form method="post" id="frmUsuario">
+                <form method="post" id="frmUsuario" onsubmit="registrarUser(event);">
+                    
+                    <input type="hidden" id="id" name="id">
+
                     <div class="form-group">
                         <label for="usuario">Usuario</label>
                         <input id="usuario" class="form-control" type="text" name="usuario" placeholder="Usuario">
-                        <input id="usuario" class="form-control" type="text" name="usuario" placeholder="Usuario">
                     </div>
+
                     <div class="form-group">
                         <label for="nombre">Nombre</label>
-                        <input type = "hidden" id = "id" name="id">
+                        <input id="nombre" class="form-control" type="text" name="nombre" placeholder="Nombre Completo">
                     </div>
+
                     <div class="row" id="claves">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -54,6 +57,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label for="caja">Caja</label>
                         <select id="caja" class="form-control" name="caja">
@@ -62,7 +66,8 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <button class="btn btn-primary" type="button" onclick="registrarUser(event);" id="btnAccion">Registrar</button>
+
+                    <button class="btn btn-primary" type="submit" id="btnAccion">Registrar</button>
                 </form>
             </div>
         </div>
